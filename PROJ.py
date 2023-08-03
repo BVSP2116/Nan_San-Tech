@@ -1,5 +1,5 @@
 import mysql.connector as sql
-db=sql.connect(host="localhost", user="root", passwd="mysqlpassword", database="patient")
+db=sql.connect(host="localhost", user="root", passwd="vivekam", database="Proj")
 if db.is_connected()==False:
     print("Cannot connect to the Database")
 cursor=db.cursor()
@@ -53,14 +53,51 @@ def Admin():
             print("Try again")
             a_delete()
     def count_comp():
-        b='select count(User_ID) from Users group by Completion_Status'
+        b='select count(User_ID) from Users group by Completion_Status where Comp_status=="Completed"'
         cursor.execute(b)
         data=cursor.fetchall()
         db.commit()
     def count_ong():
+        b='select count(User_ID) from Users group by Completion_Status where Comp_status=="Ongoing"'
+        cursor.execute(b)
+        data=cursor.fetchall()
+        db.commit()
     def count_notyet():
+        b='select count(User_ID) from Users group by Completion_Status where Comp_status=="Not Yet Started"'
+        cursor.execute(b)
+        data=cursor.fetchall()
+        db.commit()
     def count_disc():
-        
+        b='select count(User_ID) from Users group by Completion_Status where Comp_status=="Discarded"'
+        cursor.execute(b)
+        data=cursor.fetchall()
+        db.commit()
+    
+        #mains#
+   print("\n -----------------------") 
+   print("  ADMIN MENU")
+   print("-----------------------")
+   print("1.View  ")
+   print("2.Delete")
+   print("3.Count Users w.r.t their Current Completion Status")
+   print("4.Exit")
+   a=int(input("Enter your choice(1,2,3,4,5)="))
+   if a==1:
+       a_view()
+       Admin()
+   elif a==2:
+       a_delete()  
+       Admin()
+   elif a==3:
+  ##     count()
+       Admin()
+   elif a==4:                  
+     Exit()
+   else:
+       print("Retry")
+      Admin()
+     First()
+       
 def User():
     def Create():
         b=int(input("User_id:"))
@@ -99,6 +136,62 @@ def User():
             data=cursor.fetchall()
             for row in data:
                 print("\n",row)
+            
+           def delete():
+            b=int(input("User id to be deleted:"))
+            c=input("Are you sure you want to delete permanently(y/n):")
+            if (c=="Y" or c=="y"):
+                delete="DELETE FROM User  WHERE Patient_id={}". format(b)             
+                cursor.execute(delete)
+                db.commit()
+                print("Deleted Successfully")
+           elif(c=="n" or c=="N"):
+                print("Patient details not deleted")
+           else:
+               print("Try again")
+               delete()  
+            a=input("Do you want to delete more details?(y/n)")
+            if (a=="Y" or a=="y"):
+                pat_delete()
+            else:
+                Patient()
+        
+            def edit():
+                task_name = input("Enter the task name: ")
+                due_date = input("Enter the due date (YYYY-MM-DD): ")
+                task_details = input("Enter task details: ")
+                P_Level=input('Enter the Priority Level(1-10)')
+                edit=update tasks set Task_Name='{}',Task_Details='{}',Due_Date='{}',Priority_Level='{}' where user_ID='{}'.format(task_name,task_details,due_date,P_Level)
+                cursor.execute(edit)
+                db.commit()
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
             
             
             
