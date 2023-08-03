@@ -1,0 +1,14 @@
+# Create table Tasks
+create table Tasks(Task_ID int NOT NULL PRIMARY KEY,User_ID int REFERENCES Users(User_ID) ON DELETE CASCADE ON UPDATE CASCADE,Task_Name varchar(30), Task_Details varchar(255), Due_Date DATE, Priority_Level varchar(5));
+
+#Create table Users:
+ create table Users(User_ID int NOT NULL PRIMARY KEY, User_Name varchar(30) not null);
+
+#create Table Taskcomp:
+CREATE TABLE Taskcomp (
+    ->     S_No INT AUTO_INCREMENT PRIMARY KEY,
+    ->     User_ID INT,
+    ->     Task_ID INT,
+    ->     Completion_Status VARCHAR(20) DEFAULT 'Incomplete',
+    ->     FOREIGN KEY (User_ID) REFERENCES Users(User_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+    ->     FOREIGN KEY (Task_ID) REFERENCES Tasks(Task_ID) ON UPDATE CASCADE ON DELETE CASCADE);
