@@ -1,5 +1,5 @@
 import mysql.connector as sql
-db=sql.connect(host="localhost", user="root", passwd="vivekam", database="Proj")
+db=sql.connect(host="localhost", user="root", passwd="mysql", database="Project")
 if db.is_connected()==False:
     print("Cannot connect to the Database")
 cursor=db.cursor()
@@ -85,7 +85,7 @@ def Admin():
     print("2.Delete")
     print("3.Count Users w.r.t their Current Completion Status")
     print("4.Exit")
-    a=int(input("Enter your choice(1,2,3,4,5)="))
+    a=int(input("Enter your choice(1,2,3,4,5): "))
     if a==1:
         a_view()
         Admin()
@@ -107,21 +107,49 @@ def Admin():
        
 def User():
     def U_Create():
-        b=int(input("User_id:"))
-        c=input("Enter User_Name:")
-        ins="insert into User values({},'{}')".format(b,c)
-        cursor.execute(ins)
-        db.commit()
-        print('User Added to NAN_SAN TECHNOLOGIES!!')
-   
+        mail=input("Enter you mail id: ")
+        pas=input('Create a Password: ')
+        recheck=input("Retype your Password: ")
+        if pas==recheck:
+            print('Successfully created Mail ID.....Enter Further details!!')
+            b=int(input("User_id: "))
+            c=input("Enter User_Name: ")
+            ins="insert into User values({},'{}'".format(b,c)
+            cursor.execute(ins)
+            db.commit()
+            print('User Added to NAN_SAN TECHNOLOGIES!!')
+        else:
+            print("Retry Again!!")
+            U_Create()
+
     def Exist_User():
-        b=int(input("User_id:"))
-        c=input("Enter User_Name:")
-        print('SUCCESSFULLY CONNECTED TO TASK MANAGER!!')
+        mail=input("Enter you mail id: ")
+        pas=input('Enter your Password: ')
+        b="select User_Mail_ID from users"
+        cursor.execute(b)
+        data=cursor.fetchall()
+        if mail in data:
+            c="select Password from users"
+            cursor.execute()
+            data=cursor.fetchall()
+            if c in pas:
+                print('SUCCESSFULLY LOGGED IN TO TASK MANAGER!!')
+            else:
+                print('Password is Incorrect.... Try Again!!')
+                Exist_User()
+        else:
+            print('You have entered an Incorrect Mail ID!!!')
+            z=input("Do you want to Create a New account(y/n): ")
+            if (c=="Y" or c=="y"):
+                U_Create()
+            elif(c=="n" or c=="N"):
+              print('Try Again')
+              Exist_User()
+                   
         
         def create():
             task_id=int(input('Enter Unique Task ID: '))
-            task_name = input("Enter the task name: ")
+            task_name = input("Enter the Task name: ")
             due_date = input("Enter the due date (YYYY-MM-DD): ")
             task_details = input("Enter task details: ")
             P_Level=input('Enter the Priority Level(1-10)')
@@ -140,7 +168,7 @@ def User():
         
         def view():
             view="select * from tasks"
-            cursor.execute(view)
+            cursor.execute(view) 
             data=cursor.fetchall()
             for row in data:
                 print("\n",row)
