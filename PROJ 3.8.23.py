@@ -114,7 +114,9 @@ def User():
             print('Successfully created Mail ID.....Enter Further details!!')
             b=int(input("User_id: "))
             c=input("Enter User_Name: ")
-            ins="insert into User values({},'{}'".format(b,c)
+            m=mail
+            pwd=pas
+            ins="insert into Users values({},'{}','{}','{}'".format(b,c,m,pwd)
             cursor.execute(ins)
             db.commit()
             print('User Added to NAN_SAN TECHNOLOGIES!!')
@@ -140,9 +142,9 @@ def User():
         else:
             print('You have entered an Incorrect Mail ID!!!')
             z=input("Do you want to Create a New account(y/n): ")
-            if (c=="Y" or c=="y"):
+            if (z=="Y" or z=="y"):
                 U_Create()
-            elif(c=="n" or c=="N"):
+            elif(z=="n" or z=="N"):
               print('Try Again')
               Exist_User()
                    
@@ -177,7 +179,7 @@ def User():
             b=int(input("User id to be deleted:"))
             c=input("Are you sure you want to delete permanently(y/n):")
             if (c=="Y" or c=="y"):
-                del1="DELETE FROM User WHERE User_ID={}". format(b)             
+                del1="DELETE FROM Users WHERE User_ID={}". format(b)             
                 cursor.execute(del1)
                 db.commit()
                 print("Deleted Successfully")
@@ -258,5 +260,6 @@ def User():
     elif a==3:
         First()
 
+First()
 db.close()
 
