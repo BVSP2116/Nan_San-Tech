@@ -1,4 +1,5 @@
 import mysql.connector as sql
+import sys
 db=sql.connect(host="localhost", user="root", passwd="mysql", database="Project")
 if db.is_connected()==False:
     print("Cannot connect to the Database")
@@ -17,14 +18,16 @@ def First():
     elif a==2:
         User()
     elif a==3:
-        Exit()                                    
+        Exit()   
+                                         
     else:
         print("Retry")
         First()
        
 def Exit():
     print("Exited Successfully")
-    return
+    sys.exit()
+
 
 def Admin():
     def a_view():
@@ -41,15 +44,10 @@ def Admin():
         c=input("Are you sure you want to delete permanently(y/n):")
         if (c=="Y" or c=="y"):
             uid = int(input("Enter the user id:"))
-
-            # Delete related task records first
             del_tasks = "DELETE FROM tasks WHERE User_ID = {}".format(uid)
             cursor.execute(del_tasks)
-
-            # Now you can safely delete the user record
             del_user = "DELETE FROM users WHERE User_ID = {}".format(uid)
             cursor.execute(del_user)
-
             db.commit()
             print("Deleted Successfully")
         elif(c=="n" or c=="N"):
@@ -58,25 +56,25 @@ def Admin():
             print("Try again")
             a_delete()
     def count_comp():
-        b = 'SELECT COUNT(User_ID) FROM taskcomp GROUP BY Completion_Status HAVING Completion_Status = "Completed"'
+        b = 'SELECT COUNT(User_ID) FROM taskcomp GROUP BY Completion_Status HAVING Completion_Status = "{}"'.format('Completed')
         cursor.execute(b)
         data=cursor.fetchall()
         print("The total users who COMPLETED their tasks are: ",data)
         return data
     def count_ong():
-        b='select count(User_ID) from taskcomp group by Completion_Status having Completion_Status="Ongoing"'
+        b='select count(User_ID) from taskcomp group by Completion_Status having Completion_Status="{}"'.format("Ongoing")
         cursor.execute(b)
         data=cursor.fetchall()
         print("The total users whose tasks are ONGOING are: ",data)
         return data
     def count_notyet():
-        b='select count(User_ID) from taskcomp group by Completion_Status having Completion_Status="Not Yet Started"'
+        b='select count(User_ID) from taskcomp group by Completion_Status having Completion_Status="{}"'.format("Incomplete")
         cursor.execute(b)
         data=cursor.fetchall()
-        print("The total users whose tasks are NOT YET STARTED are: ",data)
+        print("The total users whose tasks are INCOMPLETE are: ",data)
         return data
     def count_disc():
-        b='select count(User_ID) from taskcomp group by Completion_Status having Completion_Status="Discarded"'
+        b='select count(User_ID) from taskcomp group by Completion_Status having Completion_Status="{}"'.format("Discarded")
         cursor.execute(b)
         data=cursor.fetchall()
         print("The total users who have DISCARDED their tasks are: ",data)
@@ -104,7 +102,6 @@ def Admin():
         count_disc()
         Admin()
     elif a==4:                  
-        Exit()
         First()
     else:
         print("Retry")
@@ -119,21 +116,13 @@ def User():
         if pas==recheck:
             print('Successfully created Mail ID.....Enter Further details!!')
             b=int(input("Create a Unique User_id: "))
-            count1='select count(*) from users where User_ID={}'.format(b)
-            cursor.execute(count1)
-            countresult=cursor.fetchone()
-            if countresult[0] == 0:
-                c=input("Enter User Name: ")
-                m=mail
-                pwd=pas
-                ins="insert into Users values({},'{}','{}','{}')".format(b,c,m,pwd)
-                cursor.execute(ins)
-                db.commit()
-                print('User Added to NAN_SAN TECHNOLOGIES!!')
-            else:
-                print("User_ID has been chosen by somebody else... Try Again")
-                U_Create()
-
+            c=input("Enter User Name: ")
+            m=mail
+            pwd=pas
+            ins="insert into Users values({},'{}','{}','{}')".format(b,c,m,pwd)
+            cursor.execute(ins)
+            db.commit()
+            print('User Added to NAN_SAN TECHNOLOGIES!!')
         else:
             print("Retry Again!!")
             U_Create()
@@ -144,16 +133,17 @@ def User():
             task_id=int(input('Enter Unique Task ID: '))
             count1='select count(*) from tasks where Task_ID={}'.format(task_id)
             cursor.execute(count1)
-            countresult=cursor.fetchall()
+            countresult=cursor.fetchone()
             if countresult[0] == 0:
                 task_name = input("Enter the Task name: ")
                 due_date = input("Enter the due date (YYYY-MM-DD): ")
                 task_details = input("Enter task details: ")
                 P_Level=input('Enter the Priority Level(1-10): ')
                 ins = "INSERT INTO tasks(Task_ID, User_ID, Task_Name, Task_Details, Due_Date, Priority_level) VALUES({}, {}, '{}', '{}', '{}', '{}')".format(task_id, uid, task_name, task_details, due_date, P_Level)
-                insert="INSERT INTO taskcomp(User_ID, Task_ID) values({},{})".format(uid,task_id)
-                cursor.execute(insert)
                 cursor.execute(ins)
+                db.commit()
+                insert="INSERT INTO taskcomp(User_ID,Task_ID) SELECT User_ID,Task_ID FROM tasks WHERE Task_ID = {}".format(task_id)
+                cursor.execute(insert)
                 db.commit()
                 print('TASK HAS BEEN ADDED SUCCESSFULLY!!!')
 
@@ -165,26 +155,31 @@ def User():
             task_id=input('Enter the Task ID to change the Status: ')
             Comp_Status= input('Completed/Inprogress/Yet to Start/Discarded: ')
             
-            sql="update taskcomp set Completion_Status='{}' where Task_id={} and User_ID={}".format(Comp_Status,task_id,uid)
+            sql="update taskcomp set Completion_Status='{}' where Task_ID={} and User_ID={}".format(Comp_Status,task_id,uid)
             cursor.execute(sql)
             db.commit()
             print('TASK STATUS UPDATED SUCESSFULLY!!')
             menu()
             
         def view():
-            view="select a.Task_ID,a.User_ID,Task_Name, Task_Details,DATE_FORMAT(Due_Date,' %Y-%m-%d') AS Date, Priority_Level, Completion_Status from tasks a,taskcomp b where a.User_ID=b.User_ID and a.User_ID={}".format(uid)
+            view="select DISTINCT a.Task_ID,a.User_ID,Task_Name, Task_Details,DATE_FORMAT(Due_Date,' %Y-%m-%d') AS Date, Priority_Level, Completion_Status from tasks a,taskcomp b where a.Task_ID=b.Task_ID; and a.User_ID={}".format(uid)
             cursor.execute(view)
             data=cursor.fetchall()
             print('Printing in the order of: .....')
-            print('| TASK_ID | TASK NAME | TASK DETAILS | DATE | PRIORITY LEVEL | COMPLETION STATUS | :')
-            for row in data:
-                print("\n",row)
+            print('\n')
+            print('| TASK_ID | TASK NAME | TASK DETAILS | DATE | PRIORITY LEVEL | COMPLETION STATUS |')
+            for i in data:
+                print(i)
             menu()
         def delete_user():
             b=int(input("User id to be deleted:"))
             c=input("Are you sure you want to delete permanently(y/n):")
             if (c=="Y" or c=="y"):
-                del1="DELETE FROM Users WHERE User_ID={}". format(b)            
+                del2='delete from tasks where User_ID={}'.format(b)
+                del3='delete from taskcomp where User_ID={}'.format(b)
+                del1="DELETE FROM Users WHERE User_ID={}".format(b)            
+                cursor.execute(del2)
+                cursor.execute(del3)
                 cursor.execute(del1)
                 db.commit()
                 print("Deleted Successfully")
@@ -193,17 +188,17 @@ def User():
             else:
                 print("Try again")
                 delete_user()  
-            menu()
+            
            
         def delete_task():
                 b=input('Enter the User ID: ')
                 c=input('Enter Task ID: ')
                 d=input('Are you Sure you want to delete the task?(y/n): ')
                 if (d=="Y" or d=="y"):
-                    del1="DELETE FROM tasks WHERE Task_ID={} and User_ID={}". format(b,c)   
-                    del2='delete from taskcomp where(User_ID, Task_ID) in (select User_ID, Task_ID FROM tasks)'
-                    cursor.execute(del2)
+                    del1="DELETE FROM tasks WHERE Task_ID={} and User_ID={}". format(c,b)   
                     cursor.execute(del1)
+                    del2='delete from taskcomp WHERE Task_ID={} and User_ID={}'.format(c,b)   
+                    cursor.execute(del2)
                     db.commit()
                     print("Deleted Successfully")
                 elif(c=="n" or c=="N"):
@@ -250,7 +245,7 @@ def User():
                 menu()
             elif b==6:
                 delete_user()
-                menu()
+                User()
                 
             elif b==5:
                 delete_task()  
@@ -305,3 +300,4 @@ def User():
             
 First()
 db.close()
+
